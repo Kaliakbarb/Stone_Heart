@@ -8929,7 +8929,7 @@ function _makeEndingScene(cfg) {
    ===================================================================== */
 
 /* ============================================================ */
-/* ===== 80-ch1-2.js (1630 lines) ===== */
+/* ===== 80-ch1-2.js (1639 lines) ===== */
 /* ============================================================ */
 /* =====================================================================
    ТАС ЖҮРЕК / STONE HEART — 80-ch1-2.js
@@ -10296,8 +10296,17 @@ function _makeEndingScene(cfg) {
     _phase: "fight",   // "fight" (delegated to Battle) -> "crumble"
     _crumbleStarted: false,
     enter: function () {
-      this._started = false; this._t = 0; this._phase = "fight"; this._crumbleStarted = false;
+      this._t = 0; this._crumbleStarted = false;
       stopMusic();
+      // onWin sets childrenFreed and re-enters this scene to play the crumble
+      // line. Without this guard enter() would reset _phase back to "fight" and
+      // the battle would restart forever (the reported bug). childrenFreed is
+      // persistent and cleared on a new game, so a fresh run still fights.
+      if (flag("childrenFreed")) {
+        this._phase = "crumble"; this._started = true;
+      } else {
+        this._phase = "fight"; this._started = false;
+      }
     },
     exit: function () { stopMusic(); },
     _startBattle: function () {
